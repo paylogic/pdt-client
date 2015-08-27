@@ -6,7 +6,7 @@ import sys
 import traceback
 
 from alembic.config import Config
-from alembic_offline import get_migrations_data
+from alembic_offline import get_migrations_data, generate_migration_graph
 from capturer import CaptureOutput
 import requests
 import six
@@ -282,3 +282,37 @@ def deploy(url, username, password, instance, ci_project, release, status, log):
     except Exception:
         pprint.pprint(response.json())
         raise
+
+
+def graph(url, username, password, alembic_config, filename, verbose=True):
+    """Generate a dotfile with an overview of all the migrations."""
+    config = Config(alembic_config)
+
+    response = requests.get(
+        '{0}/api/migrations/'.format(url),
+        auth=(username, password),
+        headers={'content-type': 'application/json'}
+    )
+    release_numbers = {}
+    try:
+        release_numbers = dict(
+            (migration['uid'], (migration.get('release') or {}).get('number'))
+            for migration in response.json()
+        )
+    except KeyError:
+        pass
+
+    def label_callback(data):
+        attributes = []
+        release = release_numbers.get(data['revision'], "Unknown")
+        attributes.append(u'- Release: {0}'.format(release))
+        for key, value in data['attributes'].items():
+            attributes.append(u'- {0}: {1}'.format(key, value))
+        return u'{0}\n{1}'.format(data['revision'], '\n'.join(attributes))
+
+    with open(filename, 'w') as fp:
+        fp.write(generate_migration_graph(config, label_callback))
+
+    if verbose:
+        print("Done")
+        print("To generate an image use: dot -Tpng -O {0}".format(filename))
