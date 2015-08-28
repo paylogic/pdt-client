@@ -12,7 +12,7 @@ long_description = []
 
 install_requires = [
     'alembic',
-    'alembic-offline>=1.0.5',
+    'alembic-offline>=1.2.0',
     'capturer>=2.1',
     'requests',
     'six',
