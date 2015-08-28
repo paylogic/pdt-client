@@ -65,6 +65,15 @@ Report deployment status
     pdt-client deploy
 
 
+Generate a graph of the revisions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The same as the graph command of alembic offline, but enriched with the release from the PDT.
+
+::
+    pdt-client graph
+
+
 Contact
 -------
 
