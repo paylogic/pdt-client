@@ -78,7 +78,7 @@ def apply_migration_step(
                 '{url}/api/migration-step-reports/'.format(url=url),
                 auth=(username, password),
                 data=json.dumps(data, sort_keys=True),
-                headers={'Content-Type': 'application/json'}
+                headers={'content-type': 'application/json'}
             )
             try:
                 response.raise_for_status()
@@ -113,7 +113,7 @@ def migrate(
         '{url}/api/migrations/'.format(url=url),
         auth=(username, password),
         params=params,
-        headers={'Content-Type': 'application/json'}
+        headers={'content-type': 'application/json'}
     )
     try:
         response.raise_for_status()
@@ -176,7 +176,7 @@ def push_data(url, username, password, alembic_config, case=None, show=False):
                 response = requests.post(
                     call_url,
                     auth=(username, password),
-                    data=json.dumps(data, sort_keys=True), headers={'Content-Type': 'application/json'})
+                    data=json.dumps(data, sort_keys=True), headers={'content-type': 'application/json'})
                 try:
                     response.raise_for_status()
                     print(
@@ -209,7 +209,7 @@ def get_not_reviewed(url, username, password, alembic_config, ci_project, case=N
         '{0}/api/migrations/'.format(url),
         params=params,
         auth=(username, password),
-        headers={'Content-Type': 'application/json'}
+        headers={'content-type': 'application/json'}
     )
     try:
         response.raise_for_status()
@@ -243,7 +243,7 @@ def get_not_applied(url, username, password, ci_project, instance, release, case
         '{0}/api/migrations/'.format(url),
         params=params,
         auth=(username, password),
-        headers={'Content-Type': 'application/json'}
+        headers={'content-type': 'application/json'}
     )
     try:
         response.raise_for_status()
@@ -271,7 +271,7 @@ def deploy(url, username, password, instance, ci_project, release, status, log):
         '{url}/api/deployment-reports/'.format(url=url),
         auth=(username, password),
         data=json.dumps(data, sort_keys=True),
-        headers={'Content-Type': 'application/json'}
+        headers={'content-type': 'application/json'}
     )
     try:
         response.raise_for_status()
