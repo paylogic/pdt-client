@@ -1,12 +1,13 @@
 """pdt-client commands."""
 import json
+from functools import partial
 import os
 import pprint
 import sys
 import traceback
 
 from alembic.config import Config
-from alembic_offline import get_migrations_data
+from alembic_offline import get_migrations_data, generate_migration_graph
 from capturer import CaptureOutput
 import requests
 import six
@@ -78,7 +79,7 @@ def apply_migration_step(
                 '{url}/api/migration-step-reports/'.format(url=url),
                 auth=(username, password),
                 data=json.dumps(data, sort_keys=True),
-                headers={'Content-Type': 'application/json'}
+                headers={'content-type': 'application/json'}
             )
             try:
                 response.raise_for_status()
@@ -113,7 +114,7 @@ def migrate(
         '{url}/api/migrations/'.format(url=url),
         auth=(username, password),
         params=params,
-        headers={'Content-Type': 'application/json'}
+        headers={'content-type': 'application/json'}
     )
     try:
         response.raise_for_status()
@@ -176,7 +177,7 @@ def push_data(url, username, password, alembic_config, case=None, show=False):
                 response = requests.post(
                     call_url,
                     auth=(username, password),
-                    data=json.dumps(data, sort_keys=True), headers={'Content-Type': 'application/json'})
+                    data=json.dumps(data, sort_keys=True), headers={'content-type': 'application/json'})
                 try:
                     response.raise_for_status()
                     print(
@@ -209,7 +210,7 @@ def get_not_reviewed(url, username, password, alembic_config, ci_project, case=N
         '{0}/api/migrations/'.format(url),
         params=params,
         auth=(username, password),
-        headers={'Content-Type': 'application/json'}
+        headers={'content-type': 'application/json'}
     )
     try:
         response.raise_for_status()
@@ -243,7 +244,7 @@ def get_not_applied(url, username, password, ci_project, instance, release, case
         '{0}/api/migrations/'.format(url),
         params=params,
         auth=(username, password),
-        headers={'Content-Type': 'application/json'}
+        headers={'content-type': 'application/json'}
     )
     try:
         response.raise_for_status()
@@ -271,7 +272,7 @@ def deploy(url, username, password, instance, ci_project, release, status, log):
         '{url}/api/deployment-reports/'.format(url=url),
         auth=(username, password),
         data=json.dumps(data, sort_keys=True),
-        headers={'Content-Type': 'application/json'}
+        headers={'content-type': 'application/json'}
     )
     try:
         response.raise_for_status()
@@ -282,3 +283,48 @@ def deploy(url, username, password, instance, ci_project, release, status, log):
     except Exception:
         pprint.pprint(response.json())
         raise
+
+
+def _label_callback(release_numbers, data):
+    """Generate a label for the revision.
+
+    :param data: Dict
+    :type data: dict
+
+    :return: String with the label.
+    :rtype: str
+    """
+    attributes = []
+    release = release_numbers.get(data['revision'], "Unknown")
+    attributes.append(u'- Release: {0}'.format(release))
+    for key, value in data['attributes'].items():
+        attributes.append(u'- {0}: {1}'.format(key, value))
+    return u'{0}\n{1}'.format(data['revision'], '\n'.join(attributes))
+
+
+def graph(url, username, password, alembic_config, filename, verbose=True):
+    """Generate a dotfile with an overview of all the migrations."""
+    config = Config(alembic_config)
+
+    response = requests.get(
+        '{0}/api/migrations/'.format(url),
+        auth=(username, password),
+        headers={'content-type': 'application/json'}
+    )
+    release_numbers = {}
+    try:
+        release_numbers = dict(
+            (migration['uid'], (migration.get('release') or {}).get('number'))
+            for migration in response.json()
+        )
+    except KeyError:
+        pass
+
+    label_callback = partial(_label_callback, release_numbers=release_numbers)
+
+    with open(filename, 'w') as fp:
+        fp.write(generate_migration_graph(config, label_callback))
+
+    if verbose:
+        print("Done")
+        print("To generate an image use: dot -Tpng -O {0}".format(filename))

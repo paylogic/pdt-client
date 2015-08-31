@@ -11,6 +11,8 @@ from pdt_client.commands import (
     get_not_reviewed,
     migrate,
     push_data,
+    graph,
+    _label_callback
 )
 
 
@@ -64,7 +66,7 @@ def test_migrate(mocker, show):
         show=show, case=33322)
     mocked_get.assert_called_with(
         'http://example.com/api/migrations/',
-        headers={'Content-Type': 'application/json'}, params={
+        headers={'content-type': 'application/json'}, params={
             'ci_project': 'some',
             'instance': 'some',
             'exclude_status': 'apl',
@@ -79,7 +81,7 @@ def test_migrate(mocker, show):
         mocked_engine.return_value.execute.assert_called_with('some script')
         mocked_post.assert_called_with(
             'http://example.com/api/migration-step-reports/',
-            headers={'Content-Type': 'application/json'},
+            headers={'content-type': 'application/json'},
             data='{"log": "Executed SQL with rowcount: 1", "report": {"instance": '
             '{"ci_project": {"name": "some"}, "name": "some"}, "migration": {"uid": "123123"}}, '
             '"status": "apl", "step": {"id": 1}}', auth=('user', 'password'))
@@ -93,7 +95,7 @@ def test_migrate(mocker, show):
         mocked_engine.return_value.execute.assert_called_with('some other script')
         mocked_post.assert_called_with(
             'http://example.com/api/migration-step-reports/',
-            headers={'Content-Type': 'application/json'},
+            headers={'content-type': 'application/json'},
             data='{"log": "Executed SQL with rowcount: 1", "report": {"instance": '
             '{"ci_project": {"name": "some"}, "name": "some"}, "migration": {"uid": "123123"}}, '
             '"status": "apl", "step": {"id": 2}}', auth=('user', 'password'))
@@ -107,7 +109,7 @@ def test_migrate(mocker, show):
         mocked_check_call.assert_called_with([sys.executable, '/some/path'])
         mocked_post.assert_called_with(
             'http://example.com/api/migration-step-reports/',
-            headers={'Content-Type': 'application/json'},
+            headers={'content-type': 'application/json'},
             data='{"log": "some output log\\nsome error output log", "report": {"instance": '
             '{"ci_project": {"name": "some"}, "name": "some"}, "migration": {"uid": "123123"}}, '
             '"status": "apl", "step": {"id": 3}}', auth=('user', 'password'))
@@ -155,7 +157,7 @@ def test_migration_data_push(mocker):
         url='http://example.com', username='user', password='password', alembic_config='some_config')
     mocked_requests.assert_called_with(
         'http://example.com/api/migrations/', headers={
-            'Content-Type': 'application/json'},
+            'content-type': 'application/json'},
         data='{"case": {"id": "33322"}, "final_steps": [{"code": "some script", "position": 0, "type": "pgsql"}], '
         '"parent": 1, "post_deploy_steps": [{"code": "some script", "position": 0, "type": "sh"}], '
         '"pre_deploy_steps": [{"code": "some script", "position": 0, "type": "mysql"}], "uid": 2}',
@@ -197,7 +199,7 @@ def test_migration_data_get_not_reviewed(mocker):
     mocked_requests.assert_called_with(
         'http://example.com/api/migrations/',
         headers={
-            'Content-Type': 'application/json'},
+            'content-type': 'application/json'},
         params={'ci_project': 'some_project', 'reviewed': True}, auth=('user', 'password'))
 
 
@@ -241,7 +243,7 @@ def test_migration_data_get_not_applied(mocker):
             ci_project='some_project', instance='some_instance', release='1520')
     mocked_requests.assert_called_with(
         'http://example.com/api/migrations/',
-        headers={'Content-Type': 'application/json'},
+        headers={'content-type': 'application/json'},
         params={'ci_project': 'some_project', 'instance': 'some_instance', 'exclude_status': 'apl', 'release': '1520'},
         auth=('user', 'password'))
 
@@ -256,7 +258,66 @@ def test_deploy(mocker):
         instance='some_instnace', ci_project='paylogic', log=log, release=1520)
     mocked_requests.assert_called_with(
         'http://example.com/api/deployment-reports/',
-        headers={'Content-Type': 'application/json'},
+        headers={'content-type': 'application/json'},
         data='{"instance": {"ci_project": {"name": "paylogic"}, "name": "some_instnace"}, '
         '"log": "some log", "release": {"number": 1520}, "status": "dpl"}',
         auth=('user', 'password'))
+
+
+def test_graph(mocker, tmpdir, capsys):
+    """Test graph command."""
+    mocked_requests = mocker.patch('requests.get')
+    mocked_alembic = mocker.patch('pdt_client.commands.generate_migration_graph')
+    mocked_alembic.return_value = "Hello"
+    fp = tmpdir.join('test.dot')
+    graph(
+        url='http://example.com',
+        username='user',
+        password='password',
+        filename=str(fp),
+        alembic_config='some_config',
+        verbose=True
+    )
+    mocked_requests.assert_called_with(
+        'http://example.com/api/migrations/',
+        headers={'content-type': 'application/json'},
+        auth=('user', 'password'))
+
+    assert fp.read() == "Hello"
+    out, err = capsys.readouterr()
+    assert out == "Done\nTo generate an image use: dot -Tpng -O {0}\n".format(fp)
+    assert err == ""
+
+
+def test_graph_key_error(mocker, tmpdir):
+    """Test unhappy path for graph command."""
+    mocked_requests = mocker.patch('requests.get')
+    mocked_requests.return_value = mock.Mock()
+    mocked_requests.return_value.json = mock.Mock(return_value=[{}])
+    mocked_alembic = mocker.patch('pdt_client.commands.generate_migration_graph')
+    mocked_alembic.return_value = "Hello"
+    fp = tmpdir.join('test.dot')
+    graph(
+        url='http://example.com',
+        username='user',
+        password='password',
+        filename=str(fp),
+        alembic_config='some_config',
+        verbose=False
+    )
+    mocked_requests.assert_called_with(
+        'http://example.com/api/migrations/',
+        headers={'content-type': 'application/json'},
+        auth=('user', 'password'))
+
+    assert fp.read() == "Hello"
+
+
+def test_label_callback():
+    """Test the label callback function."""
+    release_numbers = dict(a='123')
+    data = dict(revision='a', attributes=dict(b='c'))
+    data2 = dict(revision='b', attributes=dict(d='e'))
+
+    assert _label_callback(release_numbers, data) == u'a\n- Release: 123\n- b: c'
+    assert _label_callback(release_numbers, data2) == u'b\n- Release: Unknown\n- d: e'
