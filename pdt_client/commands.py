@@ -285,15 +285,20 @@ def deploy(url, username, password, instance, ci_project, release, status, log):
         raise
 
 
-def _label_callback(release_numbers, data):
+def _label_callback(data, release_numbers=None):
     """Generate a label for the revision.
 
-    :param data: Dict
-    :type data: dict
+    :param data: Dict with migration data.
+    :type data: dict.
+
+    :param release_numbers: dict containing the migration data from pdt.
+    :type release_numbers: dict.
 
     :return: String with the label.
     :rtype: str
     """
+    if not release_numbers:
+        release_numbers = {}
     attributes = []
     release = release_numbers.get(data['revision'], "Unknown")
     attributes.append(u'- Release: {0}'.format(release))

@@ -319,5 +319,5 @@ def test_label_callback():
     data = dict(revision='a', attributes=dict(b='c'))
     data2 = dict(revision='b', attributes=dict(d='e'))
 
-    assert _label_callback(release_numbers, data) == u'a\n- Release: 123\n- b: c'
-    assert _label_callback(release_numbers, data2) == u'b\n- Release: Unknown\n- d: e'
+    assert _label_callback(data, release_numbers) == u'a\n- Release: 123\n- b: c'
+    assert _label_callback(data2) == u'b\n- Release: Unknown\n- d: e'

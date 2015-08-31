@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.3.1
+-----
+
+* Fixed graph command (hvdklauw)
+
 1.3.0
 -----
 
