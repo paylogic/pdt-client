@@ -1,5 +1,6 @@
 """pdt-client commands."""
 import json
+from functools import partial
 import os
 import pprint
 import sys
@@ -284,6 +285,23 @@ def deploy(url, username, password, instance, ci_project, release, status, log):
         raise
 
 
+def _label_callback(release_numbers, data):
+    """Generate a label for the revision.
+
+    :param data: Dict
+    :type data: dict
+
+    :return: String with the label.
+    :rtype: str
+    """
+    attributes = []
+    release = release_numbers.get(data['revision'], "Unknown")
+    attributes.append(u'- Release: {0}'.format(release))
+    for key, value in data['attributes'].items():
+        attributes.append(u'- {0}: {1}'.format(key, value))
+    return u'{0}\n{1}'.format(data['revision'], '\n'.join(attributes))
+
+
 def graph(url, username, password, alembic_config, filename, verbose=True):
     """Generate a dotfile with an overview of all the migrations."""
     config = Config(alembic_config)
@@ -302,13 +320,7 @@ def graph(url, username, password, alembic_config, filename, verbose=True):
     except KeyError:
         pass
 
-    def label_callback(data):
-        attributes = []
-        release = release_numbers.get(data['revision'], "Unknown")
-        attributes.append(u'- Release: {0}'.format(release))
-        for key, value in data['attributes'].items():
-            attributes.append(u'- {0}: {1}'.format(key, value))
-        return u'{0}\n{1}'.format(data['revision'], '\n'.join(attributes))
+    label_callback = partial(_label_callback, release_numbers=release_numbers)
 
     with open(filename, 'w') as fp:
         fp.write(generate_migration_graph(config, label_callback))

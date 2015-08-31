@@ -11,7 +11,8 @@ from pdt_client.commands import (
     get_not_reviewed,
     migrate,
     push_data,
-    graph
+    graph,
+    _label_callback
 )
 
 
@@ -263,9 +264,36 @@ def test_deploy(mocker):
         auth=('user', 'password'))
 
 
-def test_graph(mocker, tmpdir):
+def test_graph(mocker, tmpdir, capsys):
     """Test graph command."""
     mocked_requests = mocker.patch('requests.get')
+    mocked_alembic = mocker.patch('pdt_client.commands.generate_migration_graph')
+    mocked_alembic.return_value = "Hello"
+    fp = tmpdir.join('test.dot')
+    graph(
+        url='http://example.com',
+        username='user',
+        password='password',
+        filename=str(fp),
+        alembic_config='some_config',
+        verbose=True
+    )
+    mocked_requests.assert_called_with(
+        'http://example.com/api/migrations/',
+        headers={'content-type': 'application/json'},
+        auth=('user', 'password'))
+
+    assert fp.read() == "Hello"
+    out, err = capsys.readouterr()
+    assert out == "Done\nTo generate an image use: dot -Tpng -O {0}\n".format(fp)
+    assert err == ""
+
+
+def test_graph_key_error(mocker, tmpdir):
+    """Test unhappy path for graph command."""
+    mocked_requests = mocker.patch('requests.get')
+    mocked_requests.return_value = mock.Mock()
+    mocked_requests.return_value.json = mock.Mock(return_value=[{}])
     mocked_alembic = mocker.patch('pdt_client.commands.generate_migration_graph')
     mocked_alembic.return_value = "Hello"
     fp = tmpdir.join('test.dot')
@@ -283,3 +311,13 @@ def test_graph(mocker, tmpdir):
         auth=('user', 'password'))
 
     assert fp.read() == "Hello"
+
+
+def test_label_callback():
+    """Test the label callback function."""
+    release_numbers = dict(a='123')
+    data = dict(revision='a', attributes=dict(b='c'))
+    data2 = dict(revision='b', attributes=dict(d='e'))
+
+    assert _label_callback(release_numbers, data) == u'a\n- Release: 123\n- b: c'
+    assert _label_callback(release_numbers, data2) == u'b\n- Release: Unknown\n- d: e'
