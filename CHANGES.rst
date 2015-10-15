@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.4.1
+1.4.2
 -----
 
 * Added case-data command and it's get-revisions subcommand to get case revisions (bubenkoff)

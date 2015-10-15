@@ -256,12 +256,12 @@ def test_deploy(mocker):
     log.read.return_value = 'some log'
     deploy(
         url='http://example.com', username='user', password='password', status='dpl',
-        instance='some_instnace', ci_project='paylogic', log=log, release=1520)
+        instance='some_instnace', ci_project='paylogic', log=log, release=1520, cases=[123, 232])
     mocked_requests.assert_called_with(
         'http://example.com/api/deployment-reports/',
         headers={'content-type': 'application/json'},
-        data='{"instance": {"ci_project": {"name": "paylogic"}, "name": "some_instnace"}, '
-        '"log": "some log", "release": {"number": 1520}, "status": "dpl"}',
+        data='{"cases": [{"id": 123}, {"id": 232}], "instance": {"ci_project": {"name": "paylogic"}, "name": '
+        '"some_instnace"}, "log": "some log", "release": {"number": 1520}, "status": "dpl"}',
         auth=('user', 'password'))
 
 

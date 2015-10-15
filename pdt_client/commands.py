@@ -281,18 +281,19 @@ def get_case_revisions(url, username, password, ci_project, release, case=None):
     try:
         response.raise_for_status()
         for case in response.json():
-            print(case['revision'])
+            print('{0}\t{1}'.format(case['id'], case['revision']))
     except Exception:
         pprint.pprint(response.json())
         raise
 
 
-def deploy(url, username, password, instance, ci_project, release, status, log):
+def deploy(url, username, password, instance, ci_project, release, status, log, cases):
     """Report the deployment."""
     data = dict(
         status=status,
         instance=dict(name=instance, ci_project=dict(name=ci_project)),
         release=dict(number=release),
+        cases=[dict(id=case) for case in cases],
         log=log.read()
     )
     response = requests.post(

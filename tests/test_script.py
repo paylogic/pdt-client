@@ -100,10 +100,10 @@ def test_deploy(monkeypatch, mocker):
     mocked_command = mocker.patch('pdt_client.commands.deploy')
     monkeypatch.setattr('sys.argv', [
         '', '--username=username', '--password=password', 'deploy', '--instance=some-instance', '--status=dpl',
-        '--ci-project=ci_project', '--release=1510',
+        '--ci-project=ci_project', '--release=1510', '--case=33322',
         '/dev/null'])
     main()
     mocked_command.assert_called_with(
         status='dpl', username='username',
         log=equals_any(), url='http://deployment.paylogic.eu',
-        instance='some-instance', ci_project='ci_project', release='1510', password='password')
+        instance='some-instance', ci_project='ci_project', release='1510', password='password', cases=[33322])

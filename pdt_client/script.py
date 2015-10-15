@@ -286,6 +286,15 @@ def add_subparser_deploy(subparsers):
         required=True,
     )
     parser_deploy.add_argument(
+        "--case",
+        dest="cases",
+        action="append",
+        metavar="CASE_ID",
+        type=int,
+        help="id of the deployed case",
+        required=False,
+    )
+    parser_deploy.add_argument(
         'log',
         type=argparse.FileType('r'),
         default='-',
@@ -298,6 +307,7 @@ def add_subparser_deploy(subparsers):
         ci_project=args.ci_project,
         release=args.release,
         status=args.status,
+        cases=args.cases,
         log=args.log)
     )
 
