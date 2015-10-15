@@ -260,6 +260,33 @@ def get_not_applied(url, username, password, ci_project, instance, release, case
         print('No not applied migrations found so far')
 
 
+def get_case_revisions(url, username, password, ci_project, release, case=None):
+    """Get case revisions.
+
+    :args: command line arguments namespace object
+
+    :raises:
+        * Exception - PDT replied with an error
+        * SystemExit(<number>) - found <number> of not applied migrations
+    """
+    params = dict(ci_project=ci_project, release=release)
+    if case:
+        params['id'] = case
+    response = requests.get(
+        '{0}/api/cases/'.format(url),
+        params=params,
+        auth=(username, password),
+        headers={'content-type': 'application/json'}
+    )
+    try:
+        response.raise_for_status()
+        for case in response.json():
+            print(case['revision'])
+    except Exception:
+        pprint.pprint(response.json())
+        raise
+
+
 def deploy(url, username, password, instance, ci_project, release, status, log):
     """Report the deployment."""
     data = dict(

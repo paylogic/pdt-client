@@ -6,13 +6,14 @@ import pytest
 import sys
 
 from pdt_client.commands import (
+    _label_callback,
     deploy,
+    get_case_revisions,
     get_not_applied,
     get_not_reviewed,
+    graph,
     migrate,
     push_data,
-    graph,
-    _label_callback
 )
 
 
@@ -262,6 +263,18 @@ def test_deploy(mocker):
         data='{"instance": {"ci_project": {"name": "paylogic"}, "name": "some_instnace"}, '
         '"log": "some log", "release": {"number": 1520}, "status": "dpl"}',
         auth=('user', 'password'))
+
+
+def test_case_data_get_revisions(mocker):
+    """Test deploy command."""
+    mocked_requests = mocker.patch('requests.get')
+    get_case_revisions(
+        url='http://example.com', username='user', password='password',
+        ci_project='paylogic', release=1520)
+    mocked_requests.assert_called_with(
+        'http://example.com/api/cases/',
+        headers={'content-type': 'application/json'},
+        params={'release': 1520, 'ci_project': 'paylogic'}, auth=('user', 'password'))
 
 
 def test_graph(mocker, tmpdir, capsys):

@@ -79,6 +79,22 @@ def test_migration_data_get_not_applied(monkeypatch, mocker, case):
         instance='some_instance', release='1520')
 
 
+@pytest.mark.parametrize('case', [33322, None])
+def test_case_data_get_revisions(monkeypatch, mocker, case):
+    """Test script entry point: case-data get-revisions."""
+    mocked_command = mocker.patch('pdt_client.commands.get_case_revisions')
+    case_args = ['--case={0}'.format(case)] if case else []
+    monkeypatch.setattr('sys.argv', [
+        '', '--username=username', '--password=password', 'case-data',
+    ] + case_args + ['get-revisions', '--ci-project=some_project', '--release=1520'])
+    main()
+    mocked_command.assert_called_with(
+        case=case, username='username',
+        ci_project='some_project',
+        release='1520',
+        password='password', url='http://deployment.paylogic.eu')
+
+
 def test_deploy(monkeypatch, mocker):
     """Test script entry point: deploy."""
     mocked_command = mocker.patch('pdt_client.commands.deploy')

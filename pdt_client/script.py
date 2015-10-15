@@ -34,6 +34,7 @@ def main():
     subparsers.required = True
     add_subparser_migrate(subparsers)
     add_subparser_migration_data(subparsers)
+    add_subparser_case_data(subparsers)
     add_subparser_deploy(subparsers)
     add_subparser_graph(subparsers)
     args = parser.parse_args()
@@ -207,6 +208,46 @@ def add_subparser_migration_data(subparsers):
         password=args.password,
         ci_project=args.ci_project,
         instance=args.instance,
+        release=args.release,
+        case=args.case)
+    )
+
+
+def add_subparser_case_data(subparsers):
+    """Add case-data subparser to main subparsers collection."""
+    parser_case_data = subparsers.add_parser("case-data", help="case data commands")
+    parser_case_data.add_argument(
+        "--case",
+        dest="case",
+        type=int,
+        metavar="CASE_ID",
+        help="case id",
+        required=False,
+    )
+    migration_data_subparsers = parser_case_data.add_subparsers(
+        help="sub-command help", dest='case_data_command')
+    parser_get_revisions = migration_data_subparsers.add_parser(
+        "get-revisions",
+        help="get case revisions")
+    parser_get_revisions.add_argument(
+        "--ci-project",
+        dest="ci_project",
+        metavar="CI_PROJECT_NAME",
+        help="CI project",
+        required=True,
+    )
+    parser_get_revisions.add_argument(
+        "--release",
+        dest="release",
+        metavar="RELEASE_NUMBER",
+        help="release name",
+        required=True,
+    )
+    parser_get_revisions.set_defaults(func=lambda args: commands.get_case_revisions(
+        url=args.url,
+        username=args.username,
+        password=args.password,
+        ci_project=args.ci_project,
         release=args.release,
         case=args.case)
     )
