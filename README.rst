@@ -75,12 +75,12 @@ The same as the graph command of alembic offline, but enriched with the release 
     pdt-client graph
 
 
-Get case revisions
-^^^^^^^^^^^^^^^^^^
+Get not deployed case data
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
-    pdt-client case-data get-revisions
+    pdt-client case-data get-not-deployed
 
 
 Contact

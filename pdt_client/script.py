@@ -243,12 +243,20 @@ def add_subparser_case_data(subparsers):
         help="release name",
         required=True,
     )
-    parser_get_revisions.set_defaults(func=lambda args: commands.get_case_revisions(
+    parser_get_revisions.add_argument(
+        "--instance",
+        dest="instance",
+        metavar="INSTANCE_NAME",
+        help="instance for deployment",
+        required=True,
+    )
+    parser_get_revisions.set_defaults(func=lambda args: commands.get_not_deployed_cases(
         url=args.url,
         username=args.username,
         password=args.password,
         ci_project=args.ci_project,
         release=args.release,
+        instance=args.instance,
         case=args.case)
     )
 

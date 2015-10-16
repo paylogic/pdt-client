@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.5.0
+-----
+
+* `case-data get-revisions` moved to `case-data get-not-deployed` (bubenkoff)
+
 1.4.3
 -----
 
