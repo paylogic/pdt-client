@@ -260,8 +260,8 @@ def get_not_applied(url, username, password, ci_project, instance, release, case
         print('No not applied migrations found so far')
 
 
-def get_case_revisions(url, username, password, ci_project, release, case=None):
-    """Get case revisions.
+def get_not_deployed_cases(url, username, password, ci_project, release, instance, case=None):
+    """Get not deployed cases.
 
     :args: command line arguments namespace object
 
@@ -269,7 +269,7 @@ def get_case_revisions(url, username, password, ci_project, release, case=None):
         * Exception - PDT replied with an error
         * SystemExit(<number>) - found <number> of not applied migrations
     """
-    params = dict(ci_project=ci_project, release=release)
+    params = dict(ci_project=ci_project, release=release, exclude_deployed_on=instance)
     if case:
         params['id'] = case
     response = requests.get(

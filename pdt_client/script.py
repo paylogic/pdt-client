@@ -227,8 +227,8 @@ def add_subparser_case_data(subparsers):
     migration_data_subparsers = parser_case_data.add_subparsers(
         help="sub-command help", dest='case_data_command')
     parser_get_revisions = migration_data_subparsers.add_parser(
-        "get-revisions",
-        help="get case revisions")
+        "get-not-deployed",
+        help="get not deployed case ids, revisions and titles")
     parser_get_revisions.add_argument(
         "--ci-project",
         dest="ci_project",
@@ -243,12 +243,20 @@ def add_subparser_case_data(subparsers):
         help="release name",
         required=True,
     )
-    parser_get_revisions.set_defaults(func=lambda args: commands.get_case_revisions(
+    parser_get_revisions.add_argument(
+        "--instance",
+        dest="instance",
+        metavar="INSTANCE_NAME",
+        help="instance for deployment",
+        required=True,
+    )
+    parser_get_revisions.set_defaults(func=lambda args: commands.get_not_deployed_cases(
         url=args.url,
         username=args.username,
         password=args.password,
         ci_project=args.ci_project,
         release=args.release,
+        instance=args.instance,
         case=args.case)
     )
 
