@@ -278,6 +278,13 @@ def add_subparser_deploy(subparsers):
         required=True,
     )
     parser_deploy.add_argument(
+        "--revision",
+        dest="revision",
+        metavar="REVISION",
+        help="revision",
+        required=False,
+    )
+    parser_deploy.add_argument(
         "--status",
         dest="status",
         metavar="[dpl,err]",
@@ -291,6 +298,7 @@ def add_subparser_deploy(subparsers):
         action="append",
         metavar="CASE_ID",
         type=int,
+        default=[],
         help="id of the deployed case",
         required=False,
     )
@@ -308,6 +316,7 @@ def add_subparser_deploy(subparsers):
         release=args.release,
         status=args.status,
         cases=args.cases,
+        revision=args.revision,
         log=args.log)
     )
 

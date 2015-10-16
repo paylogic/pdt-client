@@ -249,19 +249,21 @@ def test_migration_data_get_not_applied(mocker):
         auth=('user', 'password'))
 
 
-def test_deploy(mocker):
+@pytest.mark.parametrize('revision', [None, '123123'])
+def test_deploy(mocker, revision):
     """Test deploy command."""
     mocked_requests = mocker.patch('requests.post')
     log = mock.Mock()
     log.read.return_value = 'some log'
     deploy(
         url='http://example.com', username='user', password='password', status='dpl',
-        instance='some_instnace', ci_project='paylogic', log=log, release=1520, cases=[123, 232])
+        instance='some_instnace', ci_project='paylogic', log=log, release=1520, cases=[123, 232], revision=revision)
     mocked_requests.assert_called_with(
         'http://example.com/api/deployment-reports/',
         headers={'content-type': 'application/json'},
         data='{"cases": [{"id": 123}, {"id": 232}], "instance": {"ci_project": {"name": "paylogic"}, "name": '
-        '"some_instnace"}, "log": "some log", "release": {"number": 1520}, "status": "dpl"}',
+        '"some_instnace"}, "log": "some log", "release": {"number": 1520}, %s"status": "dpl"}' % (
+            '"revision": "{0}", '.format(revision) if revision else ''),
         auth=('user', 'password'))
 
 

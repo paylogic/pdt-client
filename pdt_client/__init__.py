@@ -1,5 +1,5 @@
 """pdt-client public interface."""
-__version__ = '1.4.2'
+__version__ = '1.4.3'
 
 try:
     from .commands import migrate

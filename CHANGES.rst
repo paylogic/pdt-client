@@ -1,6 +1,12 @@
 Changelog
 =========
 
+1.4.3
+-----
+
+* Added revision to deploy command (bubenkoff)
+* Make `--case` for deploy command optional (bubenkoff)
+
 1.4.2
 -----
 

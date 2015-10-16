@@ -95,15 +95,20 @@ def test_case_data_get_revisions(monkeypatch, mocker, case):
         password='password', url='http://deployment.paylogic.eu')
 
 
-def test_deploy(monkeypatch, mocker):
+@pytest.mark.parametrize('revision', ['123123', None])
+@pytest.mark.parametrize('cases', [[33322], []])
+def test_deploy(monkeypatch, mocker, revision, cases):
     """Test script entry point: deploy."""
     mocked_command = mocker.patch('pdt_client.commands.deploy')
+    revision_args = ['--revision={0}'.format(revision)] if revision else []
     monkeypatch.setattr('sys.argv', [
         '', '--username=username', '--password=password', 'deploy', '--instance=some-instance', '--status=dpl',
-        '--ci-project=ci_project', '--release=1510', '--case=33322',
+        '--ci-project=ci_project', '--release=1510'] + ['--case={0}'.format(case) for case in cases] +
+        revision_args + [
         '/dev/null'])
     main()
     mocked_command.assert_called_with(
         status='dpl', username='username',
         log=equals_any(), url='http://deployment.paylogic.eu',
-        instance='some-instance', ci_project='ci_project', release='1510', password='password', cases=[33322])
+        instance='some-instance', ci_project='ci_project', release='1510', password='password', cases=cases,
+        revision=revision)
