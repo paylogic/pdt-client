@@ -27,7 +27,7 @@ MIGRATION_PHASE_MAPPING = {
 
 
 def apply_migration_step(
-        url, username, password, migration, step, instance, ci_project, phase, engine, migrations_dir, show):
+        url, username, password, migration, step, instance, phase, engine, migrations_dir, show):
     """Apply migration step."""
     print("-- Applying migration step: id={step[id]}, position={step[position]}".format(step=step))
     report = ''
@@ -64,9 +64,6 @@ def apply_migration_step(
                     },
                     "instance": {
                         "name": instance,
-                        "ci_project": {
-                            "name": ci_project
-                        }
                     }
                 },
                 "step": {
@@ -91,23 +88,23 @@ def apply_migration_step(
             six.reraise(exc, None, sys.exc_traceback)
 
 
-def apply_migration(url, username, password, migration, instance, ci_project, phase, engine, migrations_dir, show):
+def apply_migration(url, username, password, migration, instance, phase, engine, migrations_dir, show):
     """Apply migration."""
     print("-- Applying migration: {migration[uid]}".format(migration=migration))
     for step in migration[MIGRATION_PHASE_MAPPING[phase]]:
         apply_migration_step(
             url=url, username=username, password=password,
-            migration=migration, step=step, instance=instance, ci_project=ci_project, phase=phase, engine=engine,
+            migration=migration, step=step, instance=instance, phase=phase, engine=engine,
             migrations_dir=migrations_dir, show=show)
 
 
 def migrate(
-        url, username, password, instance, ci_project, phase, connection_string, migrations_dir, release, case=None,
+        url, username, password, instance, phase, connection_string, migrations_dir, release, case=None,
         show=False):
     """Apply previously not applied migrations."""
     engine = sqlalchemy.create_engine(connection_string)
     params = dict(
-        reviewed=True, exclude_status='apl', instance=instance, ci_project=ci_project, release=release)
+        reviewed=True, exclude_status='apl', instance=instance, release=release)
     if case:
         params['case'] = case
     response = requests.get(
@@ -126,7 +123,7 @@ def migrate(
     for migration in migrations:
         apply_migration(
             url=url, username=username, password=password,
-            migration=migration, instance=instance, ci_project=ci_project, phase=phase, engine=engine,
+            migration=migration, instance=instance, phase=phase, engine=engine,
             migrations_dir=migrations_dir, show=show)
 
 
@@ -227,7 +224,7 @@ def get_not_reviewed(url, username, password, alembic_config, ci_project, case=N
         print('No not reviewed migrations found so far')
 
 
-def get_not_applied(url, username, password, ci_project, instance, release, case=None):
+def get_not_applied(url, username, password, instance, release, case=None):
     """Get not applied migrations.
 
     :args: command line arguments namespace object
@@ -237,7 +234,7 @@ def get_not_applied(url, username, password, ci_project, instance, release, case
         * SystemExit(<number>) - found <number> of not applied migrations
     """
     params = dict(
-        exclude_status='apl', ci_project=ci_project, instance=instance, release=release)
+        exclude_status='apl', instance=instance, release=release)
     if case:
         params['case'] = case
     response = requests.get(
@@ -287,15 +284,13 @@ def get_not_deployed_cases(url, username, password, ci_project, release, instanc
         raise
 
 
-def deploy(url, username, password, instance, ci_project, release, status, log, cases, revision):
+def deploy(url, username, password, instance, status, log, cases):
     """Report the deployment."""
     data = dict(
         status=status,
-        instance=dict(name=instance, ci_project=dict(name=ci_project)),
-        release=dict(number=release),
+        instance=dict(name=instance),
         cases=[dict(id=case) for case in cases],
         log=log.read(),
-        **dict(revision=revision) if revision else {}
     )
     response = requests.post(
         '{url}/api/deployment-reports/'.format(url=url),
@@ -306,8 +301,7 @@ def deploy(url, username, password, instance, ci_project, release, status, log, 
     try:
         response.raise_for_status()
         print(
-            'Reported the deployment for ci project: {instance[ci_project][name]}, instance: {instance[name]}, '
-            'release: {release[number]}'
+            'Reported the deployment for instance: {instance[name]}, cases: {cases}'
             .format(**data))
     except Exception:
         pprint.pprint(response.json())

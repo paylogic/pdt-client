@@ -52,13 +52,6 @@ def add_subparser_migrate(subparsers):
         help="instance for migration",
         required=True,
     )
-    parser_migrate.add_argument(
-        "--ci-project",
-        dest="ci_project",
-        metavar="CI_PROJECT_NAME",
-        help="CI project",
-        required=True,
-    )
     phase_options = sorted(commands.MIGRATION_PHASE_MAPPING.keys())
     parser_migrate.add_argument(
         "--phase",
@@ -108,7 +101,6 @@ def add_subparser_migrate(subparsers):
         username=args.username,
         password=args.password,
         instance=args.instance,
-        ci_project=args.ci_project,
         phase=args.phase,
         connection_string=args.connection_string,
         migrations_dir=args.migrations_dir,
@@ -189,13 +181,6 @@ def add_subparser_migration_data(subparsers):
         required=True,
     )
     parser_get_not_applied.add_argument(
-        "--ci-project",
-        dest="ci_project",
-        metavar="CI_PROJECT_NAME",
-        help="CI project",
-        required=True,
-    )
-    parser_get_not_applied.add_argument(
         "--release",
         dest="release",
         metavar="RELEASE_NUMBER",
@@ -206,7 +191,6 @@ def add_subparser_migration_data(subparsers):
         url=args.url,
         username=args.username,
         password=args.password,
-        ci_project=args.ci_project,
         instance=args.instance,
         release=args.release,
         case=args.case)
@@ -272,27 +256,6 @@ def add_subparser_deploy(subparsers):
         required=True,
     )
     parser_deploy.add_argument(
-        "--ci-project",
-        dest="ci_project",
-        metavar="CI_PROJECT_NAME",
-        help="CI project",
-        required=True,
-    )
-    parser_deploy.add_argument(
-        "--release",
-        dest="release",
-        metavar="RELEASE_NUMBER",
-        help="release name",
-        required=True,
-    )
-    parser_deploy.add_argument(
-        "--revision",
-        dest="revision",
-        metavar="REVISION",
-        help="revision",
-        required=False,
-    )
-    parser_deploy.add_argument(
         "--status",
         dest="status",
         metavar="[dpl,err]",
@@ -320,11 +283,8 @@ def add_subparser_deploy(subparsers):
         username=args.username,
         password=args.password,
         instance=args.instance,
-        ci_project=args.ci_project,
-        release=args.release,
         status=args.status,
         cases=args.cases,
-        revision=args.revision,
         log=args.log)
     )
 

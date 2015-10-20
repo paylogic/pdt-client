@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.6.0
+-----
+
+* remove unnecessary parameters in order to support pdt 1.1+ (bubenkoff)
+
 1.5.1
 -----
 

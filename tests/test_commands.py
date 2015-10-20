@@ -62,13 +62,12 @@ def test_migrate(mocker, show):
         }
     ]
     migrate(
-        url='http://example.com', username='user', password='password', instance='some', ci_project='some',
+        url='http://example.com', username='user', password='password', instance='some',
         phase='before-deploy', connection_string='sqlite:///', migrations_dir='/tmp', release='1510',
         show=show, case=33322)
     mocked_get.assert_called_with(
         'http://example.com/api/migrations/',
         headers={'content-type': 'application/json'}, params={
-            'ci_project': 'some',
             'instance': 'some',
             'exclude_status': 'apl',
             'reviewed': True,
@@ -84,10 +83,10 @@ def test_migrate(mocker, show):
             'http://example.com/api/migration-step-reports/',
             headers={'content-type': 'application/json'},
             data='{"log": "Executed SQL with rowcount: 1", "report": {"instance": '
-            '{"ci_project": {"name": "some"}, "name": "some"}, "migration": {"uid": "123123"}}, '
+            '{"name": "some"}, "migration": {"uid": "123123"}}, '
             '"status": "apl", "step": {"id": 1}}', auth=('user', 'password'))
     migrate(
-        url='http://example.com', username='user', password='password', instance='some', ci_project='some',
+        url='http://example.com', username='user', password='password', instance='some',
         phase='after-deploy', connection_string='sqlite:///', migrations_dir='/tmp', release='1510',
         show=show)
     if show:
@@ -98,10 +97,10 @@ def test_migrate(mocker, show):
             'http://example.com/api/migration-step-reports/',
             headers={'content-type': 'application/json'},
             data='{"log": "Executed SQL with rowcount: 1", "report": {"instance": '
-            '{"ci_project": {"name": "some"}, "name": "some"}, "migration": {"uid": "123123"}}, '
+            '{"name": "some"}, "migration": {"uid": "123123"}}, '
             '"status": "apl", "step": {"id": 2}}', auth=('user', 'password'))
     migrate(
-        url='http://example.com', username='user', password='password', instance='some', ci_project='some',
+        url='http://example.com', username='user', password='password', instance='some',
         phase='final', connection_string='sqlite:///', migrations_dir='/tmp', release='1510',
         show=show)
     if show:
@@ -112,14 +111,14 @@ def test_migrate(mocker, show):
             'http://example.com/api/migration-step-reports/',
             headers={'content-type': 'application/json'},
             data='{"log": "some output log\\nsome error output log", "report": {"instance": '
-            '{"ci_project": {"name": "some"}, "name": "some"}, "migration": {"uid": "123123"}}, '
+            '{"name": "some"}, "migration": {"uid": "123123"}}, '
             '"status": "apl", "step": {"id": 3}}', auth=('user', 'password'))
         mocked_check_call.side_effect = Exception('some error')
         mocked_post.reset_mock()
         mocked_post.return_value.raise_for_status.side_effect = Exception('some post error')
         with pytest.raises(Exception):
             migrate(
-                url='http://example.com', username='user', password='password', instance='some', ci_project='some',
+                url='http://example.com', username='user', password='password', instance='some',
                 phase='final', connection_string='sqlite:///', migrations_dir='/tmp', release='1510',
                 show=show)
         assert '"status": "err"' in mocked_post.call_args[1]['data']
@@ -241,11 +240,11 @@ def test_migration_data_get_not_applied(mocker):
     with pytest.raises(SystemExit):
         get_not_applied(
             url='http://example.com', username='user', password='password',
-            ci_project='some_project', instance='some_instance', release='1520')
+            instance='some_instance', release='1520')
     mocked_requests.assert_called_with(
         'http://example.com/api/migrations/',
         headers={'content-type': 'application/json'},
-        params={'ci_project': 'some_project', 'instance': 'some_instance', 'exclude_status': 'apl', 'release': '1520'},
+        params={'instance': 'some_instance', 'exclude_status': 'apl', 'release': '1520'},
         auth=('user', 'password'))
 
 
@@ -257,13 +256,12 @@ def test_deploy(mocker, revision):
     log.read.return_value = 'some log'
     deploy(
         url='http://example.com', username='user', password='password', status='dpl',
-        instance='some_instance', ci_project='paylogic', log=log, release=1520, cases=[123, 232], revision=revision)
+        instance='some_instance', log=log, cases=[123, 232])
     mocked_requests.assert_called_with(
         'http://example.com/api/deployment-reports/',
         headers={'content-type': 'application/json'},
-        data='{"cases": [{"id": 123}, {"id": 232}], "instance": {"ci_project": {"name": "paylogic"}, "name": '
-        '"some_instance"}, "log": "some log", "release": {"number": 1520}, %s"status": "dpl"}' % (
-            '"revision": "{0}", '.format(revision) if revision else ''),
+        data='{"cases": [{"id": 123}, {"id": 232}], "instance": {"name": '
+        '"some_instance"}, "log": "some log", "status": "dpl"}',
         auth=('user', 'password'))
 
 
