@@ -15,7 +15,7 @@ pdt-client
     :scale: 100%
     :target: https://readthedocs.org/projects/pdt-client/
 
-pdt-client is a client tool for Paylogic deployment tool web application
+pdt-client is a client tool for `Paylogic Deployment Tool <https://github.com/paylogic/pdt>`_ web application
 
 .. contents::
 
