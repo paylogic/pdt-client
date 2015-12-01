@@ -5,10 +5,10 @@ pdt-client is a client tool for `Paylogic Deployment Tool <https://github.com/pa
 
 .. image:: http://img.shields.io/pypi/v/pdt-client.svg
    :target: https://pypi.python.org/pypi/pdt-client
-.. image:: http://img.shields.io/coveralls/paylogic/pdt-client/master.svg
-   :target: https://coveralls.io/r/paylogic/pdt-client
 .. image:: https://travis-ci.org/paylogic/pdt-client.svg?branch=master
     :target: https://travis-ci.org/paylogic/pdt-client
+.. image:: http://img.shields.io/coveralls/paylogic/pdt-client/master.svg
+   :target: https://coveralls.io/r/paylogic/pdt-client
 .. image:: https://readthedocs.org/projects/pdt-client/badge/?version=latest
     :alt: Documentation Status
     :scale: 100%
