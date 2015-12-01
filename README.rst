@@ -1,21 +1,18 @@
 pdt-client
 ==========
 
-.. image:: https://api.travis-ci.org/paylogic/pdt-client.png
-   :target: https://travis-ci.org/paylogic/pdt-client
+pdt-client is a client tool for `Paylogic Deployment Tool <https://github.com/paylogic/pdt>`_ web application
 
-.. image:: https://pypip.in/v/pdt-client/badge.png
-   :target: https://crate.io/packages/pdt-client/
-
-.. image:: https://coveralls.io/repos/paylogic/pdt-client/badge.svg?branch=master
-    :target: https://coveralls.io/r/paylogic/pdt-client?branch=master
-
+.. image:: http://img.shields.io/pypi/v/pdt-client.svg
+   :target: https://pypi.python.org/pypi/pdt-client
+.. image:: http://img.shields.io/coveralls/paylogic/pdt-client/master.svg
+   :target: https://coveralls.io/r/paylogic/pdt-client
+.. image:: https://travis-ci.org/paylogic/pdt-client.svg?branch=master
+    :target: https://travis-ci.org/paylogic/pdt-client
 .. image:: https://readthedocs.org/projects/pdt-client/badge/?version=latest
     :alt: Documentation Status
     :scale: 100%
     :target: https://readthedocs.org/projects/pdt-client/
-
-pdt-client is a client tool for `Paylogic Deployment Tool <https://github.com/paylogic/pdt>`_ web application
 
 .. contents::
 
